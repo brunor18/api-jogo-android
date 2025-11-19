@@ -15,9 +15,17 @@ import java.net.URL
 import kotlin.concurrent.thread
 import org.json.JSONArray
 
+data class Game (
+    val price: String, // price: preco-do-jogo
+    var title: String, // title: nome-do-jogo
+    var picture: String // picture: link-da-imagem
+)
+
 
 class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
+    private val gameList = mutableListOf<Game>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -27,7 +35,6 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-//
         val editQuery = findViewById<EditText>(R.id.edit_query)
         val btnSearch = findViewById<Button>(R.id.btnSearch)
         val result = findViewById<TextView>(R.id.result)
@@ -45,17 +52,32 @@ class MainActivity : AppCompatActivity() {
 
                     val data = connection.inputStream.bufferedReader().readText()
                     val jsonArray = JSONArray(data)
-                    val showObject = jsonArray.getJSONObject(0)
 
-                    val internalName = showObject.optString("internalName", "Desconhecido")
-                    val cheapest = showObject.getJSONArray("cheapest")
-                    val thumb = showObject.optString("thumb")
+                    gameList.clear()
 
-                    val resultQuery = """
-                        internalName: $internalName
-                        cheapest: $cheapest
-                        thumb: $thumb
-                    """.trimIndent()
+
+                for (i in 0 until jsonArray.length()) {
+                        val showObject = jsonArray.getJSONObject(i)
+
+                        val title = showObject.optString("internalName", "Desconhecido")
+                        val price = showObject.optString("cheapest", "0")
+                        val picture = showObject.optString("thumb", "")
+
+                        val game = Game(
+                            title = title,
+                            price = price,
+                            picture = picture
+                        )
+                        gameList.add(game)
+                    }
+
+                    val resultQuery = gameList.joinToString("\n\n") { game ->
+                        """
+                        Nome: ${game.title}
+                        Preço: ${game.price}
+                        Foto: ${game.picture}
+                        """.trimIndent()
+                    }
 
 
                     runOnUiThread {
