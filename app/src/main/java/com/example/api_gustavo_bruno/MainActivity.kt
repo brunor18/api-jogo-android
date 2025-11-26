@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
+
 
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,8 @@ import androidx.core.view.WindowInsetsCompat
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.concurrent.thread
+import com.bumptech.glide.Glide
+import com.example.api_gustavo_bruno.databinding.ActivityMainBinding
 import org.json.JSONArray
 
 data class Game (
@@ -38,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         val editQuery = findViewById<EditText>(R.id.edit_query)
         val btnSearch = findViewById<Button>(R.id.btnSearch)
         val result = findViewById<TextView>(R.id.result)
+        val imageResult = findViewById<ImageView>(R.id.imagem)
 
 
         btnSearch.setOnClickListener()
@@ -75,13 +80,22 @@ class MainActivity : AppCompatActivity() {
                         """
                         Nome: ${game.title}
                         Preço: ${game.price}
-                        Foto: ${game.picture}
+                        Foto: ${(game.picture)}
                         """.trimIndent()
                     }
 
 
                     runOnUiThread {
                         result.text = resultQuery
+
+                        if (gameList.isNotEmpty()) {
+                            Glide.with(this@MainActivity)
+                                .load(gameList[0].picture) // Carrega a URL do primeiro jogo
+                                .into(imageResult)          // No ImageView que você mapeou
+                        } else {
+                            // Se a lista estiver vazia, limpa o ImageView
+                            imageResult.setImageDrawable(null)
+                        }
                     }
 
                 } catch (e: Exception) {
