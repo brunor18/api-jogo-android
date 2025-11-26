@@ -4,49 +4,48 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.TextView
-
-
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.concurrent.thread
-import com.bumptech.glide.Glide
-import com.example.api_gustavo_bruno.databinding.ActivityMainBinding
 import org.json.JSONArray
 
-data class Game (
-    val price: String, // price: preco-do-jogo
-    var title: String, // title: nome-do-jogo
-    var picture: String // picture: link-da-imagem
+data class Game(
+    val price: String,
+    var title: String,
+    var picture: String
 )
 
-
 class MainActivity : AppCompatActivity() {
-    @SuppressLint("MissingInflatedId")
+
     private val gameList = mutableListOf<Game>()
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         val editQuery = findViewById<EditText>(R.id.edit_query)
         val btnSearch = findViewById<Button>(R.id.btnSearch)
         val result = findViewById<TextView>(R.id.result)
-        val imageResult = findViewById<ImageView>(R.id.imagem)
+        val recycler = findViewById<RecyclerView>(R.id.recycler_games)
 
+        recycler.layoutManager = LinearLayoutManager(this)
 
-        btnSearch.setOnClickListener()
-        {
+        btnSearch.setOnClickListener {
             val gameName = editQuery.text.toString()
 
             thread {
@@ -60,42 +59,20 @@ class MainActivity : AppCompatActivity() {
 
                     gameList.clear()
 
+                    for (i in 0 until jsonArray.length()) {
+                        val obj = jsonArray.getJSONObject(i)
 
-                for (i in 0 until jsonArray.length()) {
-                        val showObject = jsonArray.getJSONObject(i)
+                        val title = obj.optString("external", "Desconhecido")
+                        val price = obj.optString("cheapest", "0")
+                        val picture = obj.optString("thumb", "")
 
-                        val title = showObject.optString("internalName", "Desconhecido")
-                        val price = showObject.optString("cheapest", "0")
-                        val picture = showObject.optString("thumb", "")
-
-                        val game = Game(
-                            title = title,
-                            price = price,
-                            picture = picture
-                        )
-                        gameList.add(game)
+                        gameList.add(Game(price, title, picture))
                     }
-
-                    val resultQuery = gameList.joinToString("\n\n") { game ->
-                        """
-                        Nome: ${game.title}
-                        Preço: ${game.price}
-                        Foto: ${(game.picture)}
-                        """.trimIndent()
-                    }
-
 
                     runOnUiThread {
-                        result.text = resultQuery
+                        result.text = "Encontrados: ${gameList.size}"
 
-                        if (gameList.isNotEmpty()) {
-                            Glide.with(this@MainActivity)
-                                .load(gameList[0].picture) // Carrega a URL do primeiro jogo
-                                .into(imageResult)          // No ImageView que você mapeou
-                        } else {
-                            // Se a lista estiver vazia, limpa o ImageView
-                            imageResult.setImageDrawable(null)
-                        }
+                        recycler.adapter = GameAdapter(gameList)
                     }
 
                 } catch (e: Exception) {
@@ -105,6 +82,5 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
     }
 }
