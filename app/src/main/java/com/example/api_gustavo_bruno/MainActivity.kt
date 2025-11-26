@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         val result = findViewById<TextView>(R.id.result)
         val recycler = findViewById<RecyclerView>(R.id.recycler_games)
 
+
         recycler.layoutManager = LinearLayoutManager(this)
 
         btnSearch.setOnClickListener {
