@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.concurrent.thread
+import org.json.JSONObject
 import org.json.JSONArray
 
 data class Game(
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val editQuery = findViewById<EditText>(R.id.edit_query)
+        val editQueryNum = findViewById<EditText>(R.id.edit_query_numero)
         val btnSearch = findViewById<Button>(R.id.btnSearch)
         val result = findViewById<TextView>(R.id.result)
         val recycler = findViewById<RecyclerView>(R.id.recycler_games)
@@ -48,40 +50,86 @@ class MainActivity : AppCompatActivity() {
 
         btnSearch.setOnClickListener {
             val gameName = editQuery.text.toString()
+            val gameId= editQueryNum.text.toString()
+
+            val nomeON = gameName.isNotEmpty()
+            val idON = gameId.isNotEmpty()
 
             thread {
                 try {
-                    val url = URL("https://www.cheapshark.com/api/1.0/games?title=$gameName")
-                    val connection = url.openConnection() as HttpURLConnection
-                    connection.requestMethod = "GET"
+                    when {
+                        nomeON && idON -> {
+                            result.text = "Somente um campo pode ser preenchido"
+                        }
 
-                    val data = connection.inputStream.bufferedReader().readText()
-                    val jsonArray = JSONArray(data)
+                        nomeON -> {
+                            val url =
+                                URL("https://www.cheapshark.com/api/1.0/games?title=$gameName")
+                            val connection = url.openConnection() as HttpURLConnection
+                            connection.requestMethod = "GET"
 
-                    gameList.clear()
+                            val data = connection.inputStream.bufferedReader().readText()
+                            val jsonArray = JSONArray(data)
 
-                    for (i in 0 until jsonArray.length()) {
-                        val obj = jsonArray.getJSONObject(i)
+                            gameList.clear()
 
-                        val title = obj.optString("external", "Desconhecido")
-                        val price = obj.optString("cheapest", "0")
-                        val picture = obj.optString("thumb", "")
+                            for (i in 0 until jsonArray.length()) {
+                                val obj = jsonArray.getJSONObject(i)
 
-                        gameList.add(Game(price, title, picture))
+                                val title = obj.optString("external", "Desconhecido")
+                                val price = obj.optString("cheapest", "0")
+                                val picture = obj.optString("thumb", "")
+
+                                gameList.add(Game(price, title, picture))
+                            }
+
+                            runOnUiThread {
+                                result.text = "Encontrados: ${gameList.size}"
+
+                                recycler.adapter = GameAdapter(gameList)
+                            }
+                        }
+
+
+                        idON -> {
+                            val url = URL("https://www.cheapshark.com/api/1.0/games?id=$gameId")
+                            val connection = url.openConnection() as HttpURLConnection
+                            connection.requestMethod = "GET"
+
+                            val data = connection.inputStream.bufferedReader().readText()
+                            val jsonObject = JSONObject(data)
+
+                            gameList.clear()
+
+                            val infoObj = jsonObject.optJSONObject("info")
+                            val cheapestObj = jsonObject.optJSONObject("cheapestPriceEver")
+
+                            if (infoObj != null) {
+                                val title = infoObj.optString("external", "Desconhecido")
+                                val price = cheapestObj?.optString("cheapest", "0")
+                                val picture = infoObj.optString("thumb", "")
+
+                                gameList.add(Game(price, title, picture))
+                            }
+
+
+                            runOnUiThread {
+                                result.text = "Encontrados: ${gameList.size}"
+                                recycler.adapter = GameAdapter(gameList)
+                            }
+                        }
+
+                        else -> {
+                            result.text = "ERRO: Preencha pelo menos um campo"
+
+                        }
                     }
-
-                    runOnUiThread {
-                        result.text = "Encontrados: ${gameList.size}"
-
-                        recycler.adapter = GameAdapter(gameList)
-                    }
-
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        result.text = "ERRO: ${e.message}"
+                }catch (e: Exception) {
+                        runOnUiThread {
+                            result.text = "ERRO DE CONEXÃO/DADOS: ${e.message}"
+                        }
                     }
                 }
             }
         }
     }
-}
