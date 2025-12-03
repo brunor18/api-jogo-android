@@ -18,7 +18,7 @@ import org.json.JSONObject
 import org.json.JSONArray
 
 data class Game(
-    val price: String,
+    val price: String?,
     var title: String,
     var picture: String
 )
@@ -105,9 +105,9 @@ class MainActivity : AppCompatActivity() {
                             val cheapestObj = jsonObject.optJSONObject("cheapestPriceEver")
 
                             if (infoObj != null) {
-                                val title = infoObj.optString("external", "Desconhecido")
-                                val price = cheapestObj?.optString("cheapest", "0")
+                                val title = infoObj.optString("title", "Desconhecido")
                                 val picture = infoObj.optString("thumb", "")
+                                val price = cheapestObj?.optString("price", "0") ?: "0"
 
                                 gameList.add(Game(price, title, picture))
                             }

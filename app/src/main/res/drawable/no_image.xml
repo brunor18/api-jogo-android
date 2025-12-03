@@ -1,0 +1,28 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Fundo cinza claro -->
+    <path
+        android:fillColor="#DDDDDD"
+        android:pathData="M0,0h64v64h-64z" />
+
+    <!-- Moldura branca -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#888888"
+        android:strokeWidth="2"
+        android:pathData="M8,8h48v48h-48z" />
+
+    <!-- Montanhas estilizadas -->
+    <path
+        android:fillColor="#AAAAAA"
+        android:pathData="M12,48 L24,32 L36,44 L44,28 L52,48z" />
+
+    <!-- Sol (círculo estilizado) -->
+    <path
+        android:fillColor="#CCCCCC"
+        android:pathData="M40,12a6,6 0 1,1 0,12a6,6 0 1,1 0,-12z" />
+</vector>

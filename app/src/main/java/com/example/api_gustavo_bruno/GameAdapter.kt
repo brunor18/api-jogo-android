@@ -31,6 +31,7 @@ class GameAdapter(private val list: List<Game>) :
 
         Glide.with(holder.itemView)
             .load(game.picture)
+            .error(R.drawable.no_image)
             .into(holder.img)
     }
 
