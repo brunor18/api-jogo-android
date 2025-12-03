@@ -31,6 +31,21 @@
         android:inputType="number"
         android:autofillHints="number" />
 
+    <EditText
+        android:id="@+id/menor_que"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Preco min"
+        android:inputType="number"
+        android:autofillHints="number" />
+
+    <EditText
+        android:id="@+id/maior_que"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Preco max"
+        android:inputType="number"
+        android:autofillHints="number" />
 
     <Button
         android:id="@+id/btnSearch"

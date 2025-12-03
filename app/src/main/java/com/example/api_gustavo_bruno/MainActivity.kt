@@ -52,6 +52,12 @@ class MainActivity : AppCompatActivity() {
             val gameName = editQuery.text.toString()
             val gameId= editQueryNum.text.toString()
 
+            val editMin = findViewById<EditText>(R.id.menor_que)
+            val editMax = findViewById<EditText>(R.id.maior_que)
+
+            val minPrice = editMin.text.toString().toDoubleOrNull()
+            val maxPrice = editMax.text.toString().toDoubleOrNull()
+
             val nomeON = gameName.isNotEmpty()
             val idON = gameId.isNotEmpty()
 
@@ -83,10 +89,18 @@ class MainActivity : AppCompatActivity() {
                                 gameList.add(Game(price, title, picture))
                             }
 
+                            val filtro = gameList.filter { game ->
+                                val value = game.price?.toDoubleOrNull() ?: 0.0
+                                val okMin = minPrice?.let { value >= it } ?: true
+                                val okMax = maxPrice?.let { value <= it } ?: true
+                                okMin && okMax
+                            }
+
                             runOnUiThread {
                                 result.text = "Encontrados: ${gameList.size}"
 
-                                recycler.adapter = GameAdapter(gameList)
+                                recycler.adapter = GameAdapter(filtro.toMutableList())
+
                             }
                         }
 
@@ -112,10 +126,19 @@ class MainActivity : AppCompatActivity() {
                                 gameList.add(Game(price, title, picture))
                             }
 
+                            // FILTRO DE PREÇO
+                            val filtro = gameList.filter { game ->
+                                val value = game.price?.toDoubleOrNull() ?: 0.0
+                                val okMin = minPrice?.let { value >= it } ?: true
+                                val okMax = maxPrice?.let { value <= it } ?: true
+                                okMin && okMax
+                            }
+
 
                             runOnUiThread {
                                 result.text = "Encontrados: ${gameList.size}"
-                                recycler.adapter = GameAdapter(gameList)
+                                recycler.adapter = GameAdapter(filtro.toMutableList())
+
                             }
                         }
 
